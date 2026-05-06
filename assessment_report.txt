@@ -1,0 +1,208 @@
+
+========================================================================
+  EMBEDDED SYSTEM CYBERSECURITY RISK ASSESSMENT TOOL
+  CVSS v3.1  |  NIS2-Aligned  |  ARM Cortex-M4 IoT Gateway
+  Author: Mainuddin Monsur Robin  |  HAW Hamburg
+========================================================================
+
+════════════════════════════════════════════════════════════════════════
+  EXECUTIVE SUMMARY
+════════════════════════════════════════════════════════════════════════
+
+  System        : ARM Cortex-M4 IoT Gateway — FreeRTOS 10.4
+  Assessment    : CVSS v3.1 Base Score | NIS2 Article 21
+
+  ┌─────────────────────────────────────┐
+  │  Risk distribution                  │
+  │                                     │
+  │  Critical : 2                       │
+  │  High     : 3                       │
+  │  Medium   : 1                       │
+  │                                     │
+  │  Avg CVSS score  : 7.9 / 10.0       │
+  │  NIS2-relevant   : 3 risks          │
+  └─────────────────────────────────────┘
+
+  Highest priority risk:
+  [R-001] Remote Code Execution via Ethernet
+  Score: 9.6  |  Critical
+  → Apply bounds checking on all network buffers. Enable MPU region protection. Update to a patched TCP/IP stack (LwIP >= 2.2.0).
+
+
+════════════════════════════════════════════════════════════════════════
+  RISK REGISTER  —  CVSS v3.1 BASE SCORES
+════════════════════════════════════════════════════════════════════════
+╭───────┬──────────────────────────────────────────────────────────┬────────────────────────────┬────────────┬──────────────╮
+│ ID    │ Threat                                                   │ Score                      │ Severity   │ Regulatory   │
+├───────┼──────────────────────────────────────────────────────────┼────────────────────────────┼────────────┼──────────────┤
+│ R-001 │ Remote Code Execution via Ethernet                       │ [███████████████████░] 9.6 │ Critical   │ 🔴 NIS2       │
+│ R-003 │ Hardcoded Credentials in Firmware                        │ [██████████████████░░] 9.2 │ Critical   │ 🔴 NIS2       │
+│ R-002 │ JTAG Firmware Tampering                                  │ [███████████████░░░░░] 7.6 │ High       │ 🔴 NIS2       │
+│ R-005 │ Privilege Escalation via FreeRTOS Task Isolation Failure │ [██████████████░░░░░░] 7.4 │ High       │              │
+│ R-004 │ Man-in-the-Middle Attack on OTA Firmware Update          │ [██████████████░░░░░░] 7.1 │ High       │              │
+│ R-006 │ Unauthorised Access via Unprotected UART Console         │ [████████████░░░░░░░░] 6.4 │ Medium     │              │
+╰───────┴──────────────────────────────────────────────────────────┴────────────────────────────┴────────────┴──────────────╯
+
+════════════════════════════════════════════════════════════════════════
+  DETAILED RISK ANALYSIS
+════════════════════════════════════════════════════════════════════════
+
+  ▶  [R-001] Remote Code Execution via Ethernet  —  Critical (9.6)
+────────────────────────────────────────────────────────────────────────
+  Component  : TCP/IP Stack / Network Driver
+  Description: Attacker sends malformed TCP packets to trigger a buffer overflow in the unvalidated network driver, gaining arbitrary code execution on the Cortex-M4 core from an adjacent network position.
+  NIS2 relevant — requires regulatory attention
+
+ID     Control                   Type        Status           Owner              NIS2
+-----  ------------------------  ----------  ---------------  -----------------  -------------
+C-001  Network Input Validation  Preventive  Partial          Firmware Team      Art. 21(2)(g)
+C-002  MPU Region Isolation      Preventive  Not Implemented  Embedded Security  Art. 21(2)(a)
+
+  Remediation: Apply bounds checking on all network buffers. Enable MPU region protection. Update to a patched TCP/IP stack (LwIP >= 2.2.0).
+
+········································································
+
+  ▶  [R-003] Hardcoded Credentials in Firmware  —  Critical (9.2)
+────────────────────────────────────────────────────────────────────────
+  Component  : Firmware
+  Description: During development, a programmer hardcoded an API keyand default admin password directly into the firmware binary to make testing easierand never removed them before production. When an attacker extracts the firmware (via JTAG, or by downloading an OTA update image), they run strings firmware.bin and find the credentials in plaintext within seconds. 
+  NIS2 relevant — requires regulatory attention
+
+ID     Control                          Type        Status           Owner              NIS2
+-----  -------------------------------  ----------  ---------------  -----------------  -------------
+C-006  Secure key storage               Preventive  Not Implemented  Embedded Security  Art. 21(2)(h)
+C-007  Firmware static analysis (SAST)  Detective   Not Implemented  DevOps Team        Art. 21(2)(g)
+C-008  Credential Rotation Policy       Corrective  Not Implemented  Security Team      Art. 21(2)(i)
+
+  Remediation: Remove hardcoded credentials from firmware. Implement a secure key storage solution, such as a hardware-backed keystore. Integrate static analysis tools into the CI/CD pipeline to detect hardcoded secrets. Establish a credential rotation policy to limit the impact of potential key compromise.
+
+········································································
+
+  ▶  [R-002] JTAG Firmware Tampering  —  High (7.6)
+────────────────────────────────────────────────────────────────────────
+  Component  : JTAG Interface
+  Description: Unauthorised physical access to JTAG port allows firmware dumping and tampering, potentially leading to persistent backdoors or extraction of sensitive data.
+  NIS2 relevant — requires regulatory attention
+
+ID     Control                       Type        Status           Owner              NIS2
+-----  ----------------------------  ----------  ---------------  -----------------  -------------
+C-003  JTAG disabled in production   Preventive  Not Implemented  Hardware Team      Art. 21(2)(h)
+C-004  Secure Boot/Firmware Signing  Preventive  Not Implemented  Embedded Security  Art. 21(2)(h)
+C-005  Tamper Detection              Detective   Partial          Hardware Team      Art. 21(2)(a)
+
+  Remediation: Implement JTAG authentication and disable in production builds. Introduce secure boot with firmware signing. Add active tamper detection mechanisms.
+
+········································································
+
+  ▶  [R-005] Privilege Escalation via FreeRTOS Task Isolation Failure  —  High (7.4)
+────────────────────────────────────────────────────────────────────────
+  Component  : FreeRTOS Task Scheduler / MPU
+  Description: Low-privilege FreeRTOS tasks can read and write memory regions of high-privilege tasks due to missing MPU configuration. A compromised low-privilege task (e.g. a sensor driver) can overwrite the stack of the main security task and escalate to full system control.
+
+ID     Control                       Type        Status           Owner              NIS2
+-----  ----------------------------  ----------  ---------------  -----------------  -------------
+C-012  FreeRTOS MPU Task Isolation   Preventive  Not Implemented  Firmware Team      Art. 21(2)(a)
+C-013  Runtime Integrity Monitoring  Detective   Not Implemented  Embedded Security  Art. 21(2)(g)
+
+  Remediation: Configure FreeRTOS MPU regions per task with least-privilege memory access. Separate security-critical tasks into privileged mode only. Implement a runtime integrity monitor using the hardware watchdog timer.
+
+········································································
+
+  ▶  [R-004] Man-in-the-Middle Attack on OTA Firmware Update  —  High (7.1)
+────────────────────────────────────────────────────────────────────────
+  Component  : OTA Update Mechanism / UART Bootloader
+  Description: Firmware updates are delivered without cryptographic signature verification. An attacker positioned between the update server and the device intercepts the update channel and delivers a malicious firmware image. The device installs it without question, achieving persistent code execution.
+
+ID     Control                                 Type        Status           Owner              NIS2
+-----  --------------------------------------  ----------  ---------------  -----------------  -------------
+C-010  Firmware Update Signature Verification  Preventive  Not Implemented  Embedded Security  Art. 21(2)(h)
+C-011  Encrypted OTA Channel (TLS)             Preventive  Partial          Firmware Team      Art. 21(2)(j)
+
+  Remediation: Implement ECDSA signature verification on all firmware updates. Use TLS 1.3 for the full update channel. Add anti-rollback counters in OTP fuses to prevent downgrade attacks.
+
+········································································
+
+  ▶  [R-006] Unauthorised Access via Unprotected UART Console  —  Medium (6.4)
+────────────────────────────────────────────────────────────────────────
+  Component  : UART Debug Console
+  Description: The UART debug console is accessible without authentication and exposes a root shell. An attacker with physical access can dump memory, modify runtime configuration, and disable security features — all without any credentials.
+
+ID     Control                              Type        Status           Owner          NIS2
+-----  -----------------------------------  ----------  ---------------  -------------  -------------
+C-014  UART Console Disabled in Production  Preventive  Not Implemented  Firmware Team  Art. 21(2)(i)
+C-015  Physical Access Control              Preventive  Implemented      Facilities     Art. 21(2)(a)
+
+  Remediation: Disable UART console in production builds using a compile-time flag. If console access is required for maintenance, implement HMAC-based challenge-response authentication before granting shell access.
+
+········································································
+
+════════════════════════════════════════════════════════════════════════
+  CONTROL EFFECTIVENESS SUMMARY
+════════════════════════════════════════════════════════════════════════
+
+  Total controls   : 14
+  Implemented      : 1
+  Partial          : 3
+  Not implemented  : 10
+  Coverage         : 7.1%
+
+  ▶  Controls by Type
+────────────────────────────────────────────────────────────────────────
+Type          Total    Implemented    Partial    Not Implemented
+----------  -------  -------------  ---------  -----------------
+Preventive       10              1          2                  7
+Detective         3              0          1                  2
+Corrective        1              0          0                  1
+
+  ▶  Unresolved Controls by Owner
+────────────────────────────────────────────────────────────────────────
+Owner                Unresolved
+-----------------  ------------
+Embedded Security             5
+Firmware Team                 4
+Hardware Team                 2
+DevOps Team                   1
+Security Team                 1
+
+  ▶  Risk Exposure Ranking
+────────────────────────────────────────────────────────────────────────
+ID     Threat                                                      CVSS    Exposure
+-----  --------------------------------------------------------  ------  ----------
+R-001  Remote Code Execution via Ethernet                           9.6         9.6
+R-003  Hardcoded Credentials in Firmware                            9.2         9.2
+R-002  JTAG Firmware Tampering                                      7.6         7.6
+R-005  Privilege Escalation via FreeRTOS Task Isolation Failure     7.4         7.4
+R-004  Man-in-the-Middle Attack on OTA Firmware Update              7.1         7.1
+R-006  Unauthorised Access via Unprotected UART Console             6.4         3.2
+
+════════════════════════════════════════════════════════════════════════
+  NIS2 ARTICLE 21 GAP ANALYSIS
+════════════════════════════════════════════════════════════════════════
+  Directive: NIS2 (EU) 2022/2555 — Network and Information Security
+
+╭───────────────┬─────────────────────────────────────────────────┬─────────────╮
+│ Article       │ Requirement                                     │ Status      │
+├───────────────┼─────────────────────────────────────────────────┼─────────────┤
+│ Art. 21(2)(b) │ Incident handling and response procedures       │ ❌ Gap       │
+│ Art. 21(2)(c) │ Business continuity and crisis management       │ ❌ Gap       │
+│ Art. 21(2)(e) │ Supply chain security                           │ ❌ Gap       │
+│ Art. 21(2)(h) │ Cryptography and encryption                     │ ⚠️  Partial │
+│ Art. 21(2)(g) │ Vulnerability handling and disclosure           │ ⚠️  Partial │
+│ Art. 21(2)(i) │ Human resources security and access control     │ ⚠️  Partial │
+│ Art. 21(2)(j) │ MFA and secure communications                   │ ⚠️  Partial │
+│ Art. 21(2)(a) │ Risk analysis and information security policies │ ✅ Covered   │
+╰───────────────┴─────────────────────────────────────────────────┴─────────────╯
+
+  ✅ Covered : 1
+  ⚠️  Partial : 4
+  ❌ Gap     : 3
+
+  Compliance coverage: 12% (1/8 articles)
+
+════════════════════════════════════════════════════════════════════════
+  ASSESSMENT COMPLETE
+════════════════════════════════════════════════════════════════════════
+  ✅ 6 risks assessed.
+  ⚠️  Review all Not Implemented controls before deployment.
+  🔴 NIS2-relevant risks require immediate regulatory attention.
+
