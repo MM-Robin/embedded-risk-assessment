@@ -75,13 +75,12 @@ python3 main.py
 ```
 
 ## Sample output
-
-========================================================================
 ```
-EMBEDDED SYSTEM CYBERSECURITY RISK ASSESSMENT TOOL
-CVSS v3.1 | NIS2-Aligned | ARM Cortex-M4 IoT Gateway
-
-Author: Mainuddin Monsur Robin | HAW Hamburg
+========================================================================
+  EMBEDDED SYSTEM CYBERSECURITY RISK ASSESSMENT TOOL
+  CVSS v3.1  |  NIS2-Aligned  |  ARM Cortex-M4 IoT Gateway
+  Author: Mainuddin Monsur Robin  |  HAW Hamburg
+========================================================================
 
 Risk distribution:
 Critical : 2
@@ -90,7 +89,7 @@ Medium : 1
 
 Avg CVSS score : 7.9 / 10.0
 NIS2-relevant : 3 risks
-
+```
 ---
 
 ## Background
@@ -99,3 +98,6 @@ Built as a portfolio project to demonstrate applied cybersecurity knowledge
 in embedded systems security, regulatory compliance, and Python engineering.
 Threat scenarios are based on real vulnerability classes documented in
 CVE databases and ENISA embedded security guidelines.
+
+## Author
+*Mainuddin Monsur Robin*
