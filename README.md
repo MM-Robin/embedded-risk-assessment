@@ -34,14 +34,17 @@ NIS2 Article 21 regulatory gap analysis on an ARM Cortex-M4 IoT gateway.
 ---
 
 ## Project structure
-
-main.py — entry point
-models.py — data models, enums, CVSS v3.1 scoring engine
-risks.py — risk register with controls and CVSS vectors
-analysis.py — control mapping and exposure analysis
-nis2.py — NIS2 Article 21 gap analysis engine
-report.py — colour terminal report generator
-requirements.txt — dependencies
+```
+embedded-risk-assessment
+|
+|--- main.py — entry point
+|--- models.py — data models, enums, CVSS v3.1 scoring engine
+|--- risks.py — risk register with controls and CVSS vectors
+|--- analysis.py — control mapping and exposure analysis
+|--- nis2.py — NIS2 Article 21 gap analysis engine
+|--- report.py — colour terminal report generator
+|___ requirements.txt — dependencies
+```
 
 ## Skills demonstrated
 
@@ -74,13 +77,17 @@ python3 main.py
 ## Sample output
 
 ========================================================================
+```
 EMBEDDED SYSTEM CYBERSECURITY RISK ASSESSMENT TOOL
 CVSS v3.1 | NIS2-Aligned | ARM Cortex-M4 IoT Gateway
+
 Author: Mainuddin Monsur Robin | HAW Hamburg
+
 Risk distribution:
 Critical : 2
 High : 3
 Medium : 1
+
 Avg CVSS score : 7.9 / 10.0
 NIS2-relevant : 3 risks
 
