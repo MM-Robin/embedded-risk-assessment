@@ -1,62 +1,107 @@
+<div align="center">
+
 # Embedded System Cybersecurity Risk Assessment Tool
 
-A command-line security assessment tool for embedded systems, built in Python.
-Performs CVSS v3.1 vulnerability scoring, security control mapping, and
-NIS2 Article 21 regulatory gap analysis on an ARM Cortex-M4 IoT gateway.
+**CVSS v3.1 Scoring · NIS2 Compliance · Threat Modelling · ARM Cortex-M4**
+
+[![Python](https://img.shields.io/badge/Python-3.8%2B-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
+[![CVSS](https://img.shields.io/badge/CVSS-v3.1-CC0000?style=flat-square)](https://www.first.org/cvss/)
+[![NIS2](https://img.shields.io/badge/Compliance-NIS2%20Art.%2021-004F9F?style=flat-square)]()
+[![Domain](https://img.shields.io/badge/Domain-Embedded%20Security-5C2D91?style=flat-square)]()
+[![License: MIT](https://img.shields.io/badge/License-MIT-22c55e?style=flat-square)](LICENSE)
+
+</div>
 
 ---
 
-## What it does
+## Overview
 
-- Scores 6 real embedded system threats using the CVSS v3.1 base score formula
-- Maps preventive, detective, and corrective security controls to each risk
-- Calculates risk exposure scores based on CVSS score and control coverage
-- Checks compliance against 8 NIS2 Article 21(2) requirements
-- Generates a colour-coded terminal report with tables, score bars, and summaries
+A **command-line cybersecurity risk assessment tool** for embedded systems, built in Python. The tool performs **CVSS v3.1 vulnerability scoring**, **security control mapping**, and **NIS2 Article 21 regulatory gap analysis** against a modelled ARM Cortex-M4 IoT gateway.
 
-## Threats modelled
-
-| ID    | Threat                                           | Score | Severity |
-| ----- | ------------------------------------------------ | ----- | -------- |
-| R-001 | Remote Code Execution via Ethernet               | 9.6   | Critical |
-| R-003 | Hardcoded Credentials in Firmware                | 9.2   | Critical |
-| R-002 | JTAG Firmware Tampering                          | 7.6   | High     |
-| R-005 | Privilege Escalation via FreeRTOS Task Isolation | 7.4   | High     |
-| R-004 | Man-in-the-Middle Attack on OTA Firmware Update  | 7.1   | High     |
-| R-006 | Unauthorised Access via UART Console             | 6.4   | Medium   |
-
-## NIS2 compliance result
-
-- 1/8 Article 21(2) requirements covered (12%)
-- 3 complete gaps: incident handling, business continuity, supply chain
-- 4 partial: cryptography, vulnerability handling, access control, secure comms
+Threat scenarios are based on real vulnerability classes documented in CVE databases and ENISA embedded security guidelines.
 
 ---
 
-## Project structure
+## What It Does
+
 ```
-embedded-risk-assessment
-|
-|--- main.py — entry point
-|--- models.py — data models, enums, CVSS v3.1 scoring engine
-|--- risks.py — risk register with controls and CVSS vectors
-|--- analysis.py — control mapping and exposure analysis
-|--- nis2.py — NIS2 Article 21 gap analysis engine
-|--- report.py — colour terminal report generator
-|___ requirements.txt — dependencies
+Input: Embedded System Threat Register (ARM Cortex-M4 IoT Gateway)
+         │
+         ▼
+  CVSS v3.1 Base Score Calculation
+         │
+         ▼
+  Security Control Mapping
+  (Preventive · Detective · Corrective)
+         │
+         ▼
+  Risk Exposure Scoring
+  (CVSS score × control coverage gap)
+         │
+         ▼
+  NIS2 Article 21(2) Gap Analysis
+         │
+         ▼
+  Colour-Coded Terminal Report
+  (Tables · Score bars · Summaries)
 ```
 
-## Skills demonstrated
+---
 
-- **CVSS v3.1** — full base score implementation from the official specification
-- **Threat modelling** — ARM/RISC-V embedded system attack surface analysis
-- **NIS2 compliance** — Article 21(2) gap identification and remediation mapping
-- **Python** — dataclasses, enums, type hints, list comprehensions, Counter
-- **Security engineering** — control mapping, exposure scoring, risk registers
+## Threats Modelled
+
+| ID | Threat | CVSS Score | Severity |
+|---|---|---|---|
+| R-001 | Remote Code Execution via Ethernet | 9.6 | 🔴 Critical |
+| R-003 | Hardcoded Credentials in Firmware | 9.2 | 🔴 Critical |
+| R-002 | JTAG Firmware Tampering | 7.6 | 🟠 High |
+| R-005 | Privilege Escalation via FreeRTOS Task Isolation | 7.4 | 🟠 High |
+| R-004 | Man-in-the-Middle Attack on OTA Firmware Update | 7.1 | 🟠 High |
+| R-006 | Unauthorised Access via UART Console | 6.4 | 🟡 Medium |
+
+**Average CVSS Score: 7.9 / 10.0**
 
 ---
 
-## Setup and run
+## NIS2 Article 21 Compliance Result
+
+| Result | Detail |
+|---|---|
+| **Coverage** | 1 / 8 Article 21(2) requirements (12%) |
+| **Complete gaps** | Incident handling · Business continuity · Supply chain |
+| **Partial coverage** | Cryptography · Vulnerability handling · Access control · Secure comms |
+
+---
+
+## Project Structure
+
+```
+embedded-risk-assessment/
+│
+├── main.py            # Entry point — orchestrates assessment pipeline
+├── models.py          # Data models, enums & CVSS v3.1 scoring engine
+├── risks.py           # Risk register — threats, controls & CVSS vectors
+├── analysis.py        # Control mapping & exposure analysis
+├── nis2.py            # NIS2 Article 21 gap analysis engine
+├── report.py          # Colour terminal report generator
+└── requirements.txt   # Dependencies (colorama, tabulate)
+```
+
+---
+
+## Skills Demonstrated
+
+| Area | Detail |
+|---|---|
+| **CVSS v3.1** | Full base score implementation from the official FIRST specification |
+| **Threat Modelling** | ARM/RISC-V embedded system attack surface analysis |
+| **NIS2 Compliance** | Article 21(2) gap identification and remediation mapping |
+| **Security Engineering** | Control mapping, exposure scoring, risk registers |
+| **Python** | Dataclasses, enums, type hints, list comprehensions |
+
+---
+
+## Setup & Run
 
 ```bash
 # Clone the repository
@@ -65,7 +110,7 @@ cd embedded-risk-assessment
 
 # Create and activate virtual environment
 python3 -m venv venv
-source venv/bin/activate
+source venv/bin/activate       # Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
@@ -74,7 +119,10 @@ pip install -r requirements.txt
 python3 main.py
 ```
 
-## Sample output
+---
+
+## Sample Output
+
 ```
 ========================================================================
   EMBEDDED SYSTEM CYBERSECURITY RISK ASSESSMENT TOOL
@@ -83,21 +131,29 @@ python3 main.py
 ========================================================================
 
 Risk distribution:
-Critical : 2
-High : 3
-Medium : 1
+  Critical : 2
+  High     : 3
+  Medium   : 1
 
-Avg CVSS score : 7.9 / 10.0
-NIS2-relevant : 3 risks
+Avg CVSS score  : 7.9 / 10.0
+NIS2-relevant   : 3 risks
 ```
+
 ---
 
 ## Background
 
-Built as a portfolio project to demonstrate applied cybersecurity knowledge
-in embedded systems security, regulatory compliance, and Python engineering.
-Threat scenarios are based on real vulnerability classes documented in
-CVE databases and ENISA embedded security guidelines.
+Built as a portfolio project to demonstrate applied cybersecurity knowledge in embedded systems security, regulatory compliance (NIS2), and Python engineering. The threat model targets a realistic ARM Cortex-M4 IoT gateway with Ethernet, JTAG, UART, OTA update, and FreeRTOS-based task isolation.
+
+---
 
 ## Author
-*Mainuddin Monsur Robin*
+
+<div align="center">
+
+**Mainuddin Monsur Robin**
+*M.Sc. Information and Communication Engineering — HAW Hamburg*
+
+[![GitHub](https://img.shields.io/badge/GitHub-MM--Robin-181717?style=flat-square&logo=github)](https://github.com/MM-Robin)
+
+</div>
